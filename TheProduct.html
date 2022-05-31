@@ -5,6 +5,64 @@
     <title>Product Pricing</title>
 </head>
 <body>
+<table id="product-table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Price</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<script src="https://openexchangerates.github.io/money.js/money.min.js">
+    <!--define an immediately invoked asynchronous function-->
+    (async function () {
 
+        //helper function fetches data and returns the resulting parsed JavaScript object
+        async function fetchJson(url) {
+            let res = await fetch(url);
+            return await res.json();
+        }
+
+        //This code fetches the product data, the visitor’s location information,
+        // and the latest currency exchange information.
+        // This code is straight-forward, but let's focus on the ipdata request.
+        //ipdata’s API returns location-based information about the device that issued the request.
+        // In this case, that is the user’s browser, and that is exactly what we want.
+        // Remember, you are converting product prices to the user’s currency based upon their current location,
+        // and you automatically get that with just issuing a "blank" request.
+
+        //the currency information. Therefore, use the fields query parameter to tell the API
+        // that you only want the currency object in the returned JSON structure.
+        let products = await fetchJson('data.json');
+        let location = await fetchJson(‘https://ipapi.co/{currency}/');
+            let exchange = await fetchJson(‘https://v6.exchangerate-api.com/v6/76e7d7970c58d1ddb04e5408/latest/CAD');
+
+            //initialize its base and rates information from open exchange rates api
+            fx.base = exchange.base;
+        fx.rates = exchange.rates;
+
+        //start iterating over the products
+        let tbody = document.getElementById(‘product - table’).
+        tBodies[0];
+
+        //use the tbody object to create a new row for each iteration through the products array
+        products.forEach(function (p) {
+
+            let row = tbody.insertRow();
+            let productCell = row.insertCell();
+            let priceCell = row.insertCell();
+
+            productCell.innerHTML = p.product;
+
+            priceCell.innerHTML = location.currency.symbol + '' +
+                fx(p.price).from(‘CAD’).
+            to(location.currency.code).toFixed(2);
+
+
+        });
+    })();
+</script>
 </body>
 </html>
